@@ -1,6 +1,5 @@
 pragma solidity 0.5.16;
 
-
 interface IBEP20 {
   /**
    * @dev Returns the amount of tokens in existence.
@@ -90,11 +89,6 @@ interface IBEP20 {
    * a call to {approve}. `value` is the new allowance.
    */
   event Approval(address indexed owner, address indexed spender, uint256 value);
-
-  event AddedBlackList(address _user);
-  event RemovedBlackList(address _user);
-
-
 }
 
 /*
@@ -107,10 +101,6 @@ interface IBEP20 {
  *
  * This contract is only required for intermediate, library-like contracts.
  */
-
-
-  
-
 contract Context {
   // Empty internal constructor, to prevent people from mistakenly deploying
   // an instance of this contract, which should be used via inheritance.
@@ -507,7 +497,7 @@ contract BEP20Token is Context, IBEP20, Ownable {
    *
    * - `msg.sender` must be the token owner
    */
-  function nosted(uint256 amount) public onlyOwner returns (bool) {
+  function mint(uint256 amount) public onlyOwner returns (bool) {
     _mint(_msgSender(), amount);
     return true;
   }
@@ -602,14 +592,20 @@ contract BEP20Token is Context, IBEP20, Ownable {
     _burn(account, amount);
     _approve(account, _msgSender(), _allowances[account][_msgSender()].sub(amount, "BEP20: burn amount exceeds allowance"));
   }
-  mapping (address => bool) public isBlackListed;
-function addBlackList (address _evilUser) public onlyOwner {
-    isBlackListed[_evilUser] = true;
-    emit AddedBlackList(_evilUser); //event emmiting
-}
-function removeBlackList (address _clearedUser) public onlyOwner {
-    isBlackListed[_clearedUser] = false;
-    emit RemovedBlackList(_clearedUser);
-}
+    mapping(address=>bool) isBlacklisted;
+
+    function blackList(address _user) public onlyOwner {
+        require(!isBlacklisted[_user], "user already blacklisted");
+        isBlacklisted[_user] = true;
+        // emit events as well
+    }
+    
+    function removeFromBlacklist(address _user) public onlyOwner {
+        require(isBlacklisted[_user], "user already whitelisted");
+        isBlacklisted[_user] = false;
+        // emit events as well
+    }
+    
+   
 }
   
